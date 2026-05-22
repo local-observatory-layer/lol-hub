@@ -26,12 +26,9 @@ impl AppConfig {
 
     pub fn bind_addr(&self) -> Result<SocketAddr, std::io::Error> {
         let addr = format!("{}:{}", self.bind_host, self.bind_port);
-        addr.to_socket_addrs()?
-            .next()
-            .ok_or_else(|| std::io::Error::new(
-                std::io::ErrorKind::InvalidInput,
-                "no address found"
-            ))
+        addr.to_socket_addrs()?.next().ok_or_else(|| {
+            std::io::Error::new(std::io::ErrorKind::InvalidInput, "no address found")
+        })
     }
 }
 

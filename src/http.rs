@@ -56,9 +56,11 @@ async fn stream_samples(
 
                     return Some((Ok(event), rx));
                 }
+
                 Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {
                     continue;
                 }
+
                 Err(tokio::sync::broadcast::error::RecvError::Closed) => {
                     return None;
                 }

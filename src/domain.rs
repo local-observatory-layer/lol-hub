@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, SocketAddr};
+use std::net::{SocketAddr, ToSocketAddrs};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -24,9 +24,11 @@ impl AppConfig {
         })
     }
 
-    pub fn bind_addr(&self) -> Result<SocketAddr, std::net::AddrParseError> {
-        let ip: IpAddr = self.bind_host.parse()?;
-        Ok(SocketAddr::from((ip, self.bind_port)))
+    pub fn bind_addr(&self) -> Result<SocketAddr, std::io::Error> {
+        let addr = format!("{}:{}", self.bind_host, self.bind_port);
+        addr.to_socket_addrs()?.next().ok_or_else(|| {
+            std::io::Error::new(std::io::ErrorKind::InvalidInput, "no address found")
+        })
     }
 }
 
@@ -58,4 +60,39 @@ pub struct RenderDescriptor {
 pub enum ServerEvent {
     Sample(DeviceSample),
     Descriptor(DeviceDescriptor),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uses_defaults() {
+        let cfg = AppConfig::from_env().unwrap();
+
+        assert_eq!(cfg.bind_host, "127.0.0.1");
+        assert_eq!(cfg.bind_port, 3060);
+    }
+
+    #[test]
+    fn bind_addr_builds_socket_addr() {
+        let cfg = AppConfig {
+            bind_host: "127.0.0.1".into(),
+            bind_port: 3060,
+        };
+
+        let addr = cfg.bind_addr().unwrap();
+
+        assert_eq!(addr.to_string(), "127.0.0.1:3060");
+    }
+
+    #[test]
+    fn invalid_host_returns_error() {
+        let cfg = AppConfig {
+            bind_host: "lol.invalid".into(),
+            bind_port: 3060,
+        };
+
+        assert!(cfg.bind_addr().is_err());
+    }
 }

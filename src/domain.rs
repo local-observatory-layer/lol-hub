@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::net::{SocketAddr, ToSocketAddrs};
 use uuid::Uuid;
 
@@ -35,8 +36,7 @@ impl AppConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DeviceSample {
     pub device_id: Uuid,
-    pub boot_id: Uuid,
-    pub seq: u64,
+    pub kind: String,
     pub data: f64,
 }
 
@@ -44,11 +44,11 @@ pub struct DeviceSample {
 pub struct DeviceDescriptor {
     pub device_id: Uuid,
     pub name: String,
-    pub render: RenderDescriptor,
+    pub layouts: HashMap<String, LayoutDescriptor>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RenderDescriptor {
+pub struct LayoutDescriptor {
     pub width: u32,
     pub height: u32,
     pub color_mode: String,

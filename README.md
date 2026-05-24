@@ -26,17 +26,14 @@ Ingest a sample from a device.
 JSON object containing the sample payload. Each sample should include:
 
 - `device_id` — stable device UUID
-- `boot_id` — UUID generated once per boot
-- `seq` — monotonically increasing `u64` sequence number for this boot
-- sample-specific fields
+- `kind` — string specifying the sample type
+- `data` - actual value for the sample
 
 Example:
 
 ```json
 {
   "device_id": "550e8400-e29b-41d4-a716-446655440000",
-  "boot_id": "c1c8f8df-4c6d-4c71-8f1e-bf4cf8d48d9b",
-  "seq": 42,
   "kind": "temperature",
   "value": 23.4
 }
